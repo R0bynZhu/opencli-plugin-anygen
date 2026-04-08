@@ -1,8 +1,121 @@
-import { cli, Strategy } from "@jackwener/opencli/registry";
-import { CommandExecutionError } from "@jackwener/opencli/errors";
+// node_modules/@jackwener/opencli/dist/src/registry.js
+var Strategy;
+(function(Strategy2) {
+  Strategy2["PUBLIC"] = "public";
+  Strategy2["COOKIE"] = "cookie";
+  Strategy2["HEADER"] = "header";
+  Strategy2["INTERCEPT"] = "intercept";
+  Strategy2["UI"] = "ui";
+})(Strategy || (Strategy = {}));
+var _registry = globalThis.__opencli_registry__ ??= /* @__PURE__ */ new Map();
+function cli(opts) {
+  const strategy = opts.strategy ?? (opts.browser === false ? Strategy.PUBLIC : Strategy.COOKIE);
+  const browser = opts.browser ?? strategy !== Strategy.PUBLIC;
+  const aliases = normalizeAliases(opts.aliases, opts.name);
+  const cmd = {
+    site: opts.site,
+    name: opts.name,
+    aliases,
+    description: opts.description ?? "",
+    domain: opts.domain,
+    strategy,
+    browser,
+    args: opts.args ?? [],
+    columns: opts.columns,
+    func: opts.func,
+    pipeline: opts.pipeline,
+    timeoutSeconds: opts.timeoutSeconds,
+    footerExtra: opts.footerExtra,
+    requiredEnv: opts.requiredEnv,
+    deprecated: opts.deprecated,
+    replacedBy: opts.replacedBy,
+    navigateBefore: opts.navigateBefore,
+    defaultFormat: opts.defaultFormat
+  };
+  registerCommand(cmd);
+  return cmd;
+}
+function fullName(cmd) {
+  return `${cmd.site}/${cmd.name}`;
+}
+function registerCommand(cmd) {
+  const canonicalKey = fullName(cmd);
+  const existing = _registry.get(canonicalKey);
+  if (existing) {
+    for (const [key, value] of _registry.entries()) {
+      if (value === existing && key !== canonicalKey)
+        _registry.delete(key);
+    }
+  }
+  const aliases = normalizeAliases(cmd.aliases, cmd.name);
+  cmd.aliases = aliases.length > 0 ? aliases : void 0;
+  _registry.set(canonicalKey, cmd);
+  for (const alias of aliases) {
+    _registry.set(`${cmd.site}/${alias}`, cmd);
+  }
+}
+function normalizeAliases(aliases, commandName) {
+  if (!Array.isArray(aliases) || aliases.length === 0)
+    return [];
+  const seen = /* @__PURE__ */ new Set();
+  const normalized = [];
+  for (const alias of aliases) {
+    const value = typeof alias === "string" ? alias.trim() : "";
+    if (!value || value === commandName || seen.has(value))
+      continue;
+    seen.add(value);
+    normalized.push(value);
+  }
+  return normalized;
+}
+
+// node_modules/@jackwener/opencli/dist/src/hooks.js
+var _hooks = globalThis.__opencli_hooks__ ??= /* @__PURE__ */ new Map();
+
+// node_modules/@jackwener/opencli/dist/src/errors.js
+var EXIT_CODES = {
+  SUCCESS: 0,
+  GENERIC_ERROR: 1,
+  USAGE_ERROR: 2,
+  // Bad arguments / command misuse
+  EMPTY_RESULT: 66,
+  // No data / not found           (EX_NOINPUT)
+  SERVICE_UNAVAIL: 69,
+  // Daemon / browser unavailable  (EX_UNAVAILABLE)
+  TEMPFAIL: 75,
+  // Timeout — try again later     (EX_TEMPFAIL)
+  NOPERM: 77,
+  // Auth required / permission    (EX_NOPERM)
+  CONFIG_ERROR: 78,
+  // Missing / invalid config      (EX_CONFIG)
+  INTERRUPTED: 130
+  // Ctrl-C / SIGINT
+};
+var CliError = class extends Error {
+  /** Machine-readable error code (e.g. 'BROWSER_CONNECT', 'AUTH_REQUIRED') */
+  code;
+  /** Human-readable hint on how to fix the problem */
+  hint;
+  /** Unix process exit code — defaults to 1 (generic error) */
+  exitCode;
+  constructor(code, message, hint, exitCode = EXIT_CODES.GENERIC_ERROR) {
+    super(message);
+    this.name = new.target.name;
+    this.code = code;
+    this.hint = hint;
+    this.exitCode = exitCode;
+  }
+};
+var CommandExecutionError = class extends CliError {
+  constructor(message, hint) {
+    super("COMMAND_EXEC", message, hint, EXIT_CODES.GENERIC_ERROR);
+  }
+};
+
+// create.ts
 import * as fs from "node:fs";
 import * as path from "node:path";
-const TYPE_LABELS = {
+var TYPE_LABELS = {
   slides: "\u9009\u62E9\u5E7B\u706F\u7247\u7C7B\u578B",
   design: "\u9009\u62E9 AI \u8BBE\u8BA1\u5E08\u7C7B\u578B",
   video: "\u751F\u6210\u89C6\u9891",
@@ -11,7 +124,7 @@ const TYPE_LABELS = {
   data: "\u9009\u62E9\u6570\u636E\u5206\u6790\u7C7B\u578B",
   chart: "\u7ED8\u5236\u56FE\u8868"
 };
-const createCommand = cli({
+var createCommand = cli({
   site: "anygen",
   name: "create",
   description: "Create a new AnyGen document (default), slides, design, video, etc.",
