@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "AnyGen CLI — create docs, slides, videos",
-  "dependencies": {
+  "peerDependencies": {
     "@jackwener/opencli": ">=1.6.8"
   }
 }
