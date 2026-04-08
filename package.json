@@ -1,0 +1,9 @@
+{
+  "name": "opencli-plugin-anygen",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AnyGen CLI — create docs, slides, videos",
+  "peerDependencies": {
+    "@jackwener/opencli": ">=1.6.8"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "anygen",
+  "version": "0.1.0",
+  "description": "AnyGen CLI — create docs, slides, videos",
+  "opencli": ">=1.6.8"
+}
