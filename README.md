@@ -1,34 +1,46 @@
 # opencli-plugin-anygen
 
-AnyGen CLI — create docs, slides, videos
+AnyGen CLI — create docs, slides, videos from the terminal.
 
 ## Install
 
 ```bash
-# From local development directory
-opencli plugin install file:///private/tmp/opencli-plugin-anygen
-
-# From GitHub (after publishing)
-opencli plugin install github:<user>/opencli-plugin-anygen
+opencli plugin install github:R0bynZhu/opencli-plugin-anygen
 ```
 
 ## Commands
 
-| Command | Type | Description |
-|---------|------|-------------|
-| `anygen/hello` | YAML | Sample YAML command |
-| `anygen/greet` | TypeScript | Sample TS command |
+| Command | Strategy | Description |
+|---------|----------|-------------|
+| `anygen create` | UI | Create a new AnyGen document, slides, design, video, etc. |
+| `anygen list` | UI | List recent AnyGen documents from your library |
+| `anygen status` | Cookie | Show AnyGen credits and subscription status |
+
+## Usage
+
+```bash
+# Create a slides presentation
+opencli anygen create --prompt "AI 发展趋势" --type slides
+
+# Create a document (default type)
+opencli anygen create --prompt "quarterly report summary"
+
+# Create with file attachments
+opencli anygen create --prompt "summarize this" --files report.pdf,data.csv
+
+# List recent documents
+opencli anygen list --limit 5
+
+# Check subscription status
+opencli anygen status
+```
 
 ## Development
 
 ```bash
-# Install locally for development (symlinked, changes reflect immediately)
-opencli plugin install file:///private/tmp/opencli-plugin-anygen
+# Install locally (symlinked, changes reflect immediately)
+opencli plugin install file://$(pwd)
 
 # Verify commands are registered
-opencli list | grep anygen
-
-# Run a command
-opencli anygen hello
-opencli anygen greet --name World
+opencli anygen --help
 ```
